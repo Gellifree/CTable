@@ -1,2 +1,2 @@
 # CTable
-TimeTable magement for OP
+TimeTable manager program for Operating systems CV.
