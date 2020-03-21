@@ -1,0 +1,115 @@
+NAME
+		CTable - Terminal based timetable manager
+		Version: 1.0
+
+DESCRIPTION
+		A program designed for managing timetables securely, and collecting information from them.
+		Helping a group to organize events, based on their members free time.
+
+		In this version, the program is optimized for University student groups.
+			>> You can only store simplified versions of the timetables,
+			   - 6 lesson, on 6 days [6x6 format]
+			>> You can not give special timeframe for a lesson.
+			   - If the timetable you try to store contains special lessons with different timeframes -
+			   
+			     Try to make it as close as posibble to the original
+			     	-- If the lessons timeframe is smaller than usual, you have nothing to do --
+			     	   just give it as [P]ractice, [L]ecture or [W]ork normally.
+
+			     	-- If the lessons timeframe is bigger than usual, you have to decide how much is the 'overlap' --
+			     	   If its overlapping more than half of the other lesson timeframe
+			     	   		- Mark the other lesson as the overlapping one
+			     	   If its overlapping less than half of the other lesson timeframe
+			     	   		- Mark the other lesson as empty [0] at your own risk. 
+
+						-- WARNING:
+						If you want to make sure, the program always shows the people who surely have time,
+						than mark the other lesson as the overlapping one. --
+			     	   
+			>> There is no Sunday implemented, or lessons after 19:00
+
+		You need a registered account to use and acces the informations.
+		Accounts are NOT stored online.
+
+MENU
+		[X] Exit
+			Press 'q' or 'Q' to exit from the program.
+			The program will exit after confirmation.
+			
+			(Press Enter if you want to quit when asked, the [Y]es option is already selected)
+			
+		>> LOGGED OUT >>
+
+		[0] Login
+			You need to enter a valid username and password to acces the program.
+			There is no registration available yet.
+			
+			There is only one user,
+			please write an e-mail to the author if no username was provided to you.
+ 
+		[1] Help
+			Displays this help document.
+
+		[2] Settings
+			Settings are not yet available.
+
+		>> LOGGED IN >>
+
+		[0] Add TimeTable
+			You need to enter the owner of the timetable,
+			and give the lessons in a specific format.
+
+			Formatting help: 
+				Owner: Owner Name
+				Lesson[6x6]: 000000-000000-000000-000000-000000-000000
+
+				-- WARNING: The program will only accept properly formatted input --
+
+		[1] Watch TimeTable
+			You have to select the owner of the timetable,
+			then the timetable of the owner will display.
+			
+		[2] Delete TimeTable
+			-- Please, be careful when deleting, you can NOT undo this action. --
+			
+			You have to select the owner of the timetable,
+			then the program will show if the deleting was a succes.
+
+			If you dont see any " > 'Owner Name' deleted < " message, something went wrong!
+
+			If you see multiple " > 'Owner Name' deleted < " message, there were duplicates.
+
+		[3] Watch Day
+			You have to select a specific day, then the program will show how many of the members
+			have free time on that day, in percents. The information is calculated from the stored timetables.
+
+			After asked, you have the option to watch a specific time.
+			You will see the available, and the non available members too.
+				In the non available members list, the program shows you the reason, why is the member busy at that specific time.
+
+				-- Member Name - [R]eason
+
+		[4] Watch Week
+			After selecting this option, the program will show the entire week formatted, showing the informations,
+			in percents.
+
+			You get the option to watch a specific day.
+				Please read the - [3] Watch Day - part of this help document.
+			
+		[4] Log out
+			Simply logs the user out after asking for confirmation.	
+
+TIMETABLE
+		Meaning of the [R]eason marks:
+		
+			L - [L]ecture
+
+			W - [W]ork
+
+			P - [P]ractice
+
+			0 - Empty
+
+AUTHOR
+		Written by Norbert Kovacs
+		E-mail: mfw.kovacs.norbert@gmail.com		

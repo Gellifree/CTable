@@ -1,15 +1,15 @@
-################################################
-#--- Kovács Norbert - PTI-FOSZ              ---#
-#--- 2020                                   ---#
-#--- Operációsrendszerek gyakorlat beadandó ---#
+# >> Kovács Norbert          <<
+# >> 2020                    <<
+# >> Op. rend. gyakorlat     << 
 
+import os
+import encrypt as en
 from getpass import getpass
-import os,encrypt
 
-os.system("clear")
 
-class User:
-    def __init__(self,userName = "user",userPassword = "",userType = "normal"):
+# Classes
+class User():
+    def __init__(self, userName, userPassword = "",userType = "normal"):
         self.userName = userName
         self.userPassword = userPassword
         self.userType = userType
@@ -19,195 +19,443 @@ class TimeTable():
         self.user = user
         self.data = data
 
-#szintaxis ellenőrzés?
-#def systaxCheck():
-#    ?
+class SyntaxChecker():
+    def musntContain(self,text,char):
+        for i in text:
+            if(i == char):
+                return False
+        return True
+        
+    def mustContain(self,text,char,piece):
+        count = 0
+        for i in text:
+            if(i == char):
+                count += 1
+        if(count == piece):
+            return True
+        else:
+            return False
+            
+    def distanceCheck(self,text,char,distance):
+        distanceList = []
+        lessons = ""
+        for i in range(len(text)):
+            if(text[i] != char):
+                lessons += text[i]
+            if(text[i] == char):
+                distanceList.append(len(lessons))
+                lessons = ""
+        distanceList.append(len(lessons))
+        for i in distanceList:
+            if(i != distance):
+                return False
+        return True
 
+    def nameCheck(self,name):
+        if(self.musntContain(name,"-") == True and len(name)>3):
+            return True
+        else:
+            return False
 
-def readData(data):
+    def lessonsCheck(self, lessons):
+        if(self.mustContain(lessons,"-",5) == True and self.distanceCheck(lessons,"-",6) == True):
+            return True
+        else:
+            return False
+    #Lesson char check?
+
+    
+# functions for files
+def readUserData(data):
     index = 0
     userInformation = []
     for i in range(3):
         userInformation.append("")
         while(data[index] != ";"):
             userInformation[i] += data[index]
-            index+=1
+            index += 1
         index+=1
-    result = User(userInformation[0],userInformation[1],userInformation[2])
-    #Jelszó kódolása a .user file-ban
-    return result
+    return User(userInformation[0],userInformation[1],userInformation[2])
 
-def menu(menuElements):
-    result = 0
-
-    for i in range(len(menuElements)):
-        print("[{1}] {0}".format(menuElements[i],i+1))
-
-    result = input("Kérlek adj meg egy menüopciót: ")
-    return result
-
+# functions for MenuBlocks
 def login():
-    os.system("clear")
-    result = False
+    os.system('setterm -foreground yellow')
+    userName = input(" Username: ")
+    userPassword = getpass(" Password: ")
+    os.system('setterm -foreground white')
+    users = open(".user","r")
 
-    print("Üdvözlöm a CTable bejelentkezési képernyőjén")
-    adminName = input("Admin felhasználó: ")
-    adminPassword = getpass("Admin jelszó: ")
-    f = open(".user","r")
-    for x in f:
-        data = x
-    data = encrypt.logData(data,20)
-    f.close()
-    admin = readData(data)
-    if(adminName == admin.userName and adminPassword == admin.userPassword):
-        print("Sikeres bejelentkezés!")
-        result = True
+    for user in users:
+        data = user
+        # Only one user exist at the time - maybe later we want to expand
+    data = en.logData(data,20)
+    users.close()
+    user = readUserData(data)
+    if(userName == user.userName and userPassword == user.userPassword):
+        print("\n > Login successful <")
+        return True
     else:
-        print("Felhasználónév vagy jelszó helytelen!")
-    return result
+        print(" > Username or Password is not correct <\n")
+        return False
+    #Saving every unsuccesfull login attempt?
 
-def adminmenu():
-    menuElements = ["Órarend hozzáadása","Órarend megtekintése","Órarend módosítása","Órarend törlése"]
-    menuResult = menu(menuElements)
-    return menuResult
-
-def AddTimeTable():
-    #tábla hozzáadása
+def help():
     os.system("clear")
-    print("CTable - Órarend hozzáadása")
-    user = input("Az órarend tulajdonosa: ")
-    #inputMethot = input("Beviteli módszer kiválasztása?")
-    timeTable = input("Az órarend X formátumban: ")
+    width = os.get_terminal_size().columns
+    os.system('setterm -foreground blue')
+    print("CTable",end="")
+    print("CTable help screen\n".center(width))
+    os.system('setterm -foreground white')
+    os.system("cat help")
+    #on small screen?
+
+def settings():
+    print("     >> Settings are not available yet<<\n")
+
+def addTimeTable():
+    os.system("clear")
+    width = os.get_terminal_size().columns
+    os.system('setterm -foreground blue')
+    print("CTable",end="")
+    print("Add TimeTable\n".center(width))
+    os.system('setterm -foreground white')
+    
+    synCh = SyntaxChecker()
+    owner = ""
+    while(synCh.nameCheck(owner) == False):    
+        owner = input(" The owner of the table: ")
+        if(synCh.nameCheck(owner) == False):
+            print(" > Name has to be longer tha 3 characters, and can not containt '-' symbol <\n")
+        else:
+            print(" > Name accepted <\n")
+    timeTable = ""
+    while(synCh.lessonsCheck(timeTable) == False):
+        timeTable = input(" The formatted lessons[6x6]: ")
+        if(synCh.lessonsCheck(timeTable) == False):
+            print(" > Wrong format <")
+            print(" > Please read the help file instructions <\n")
+        else:
+            print(" > TimeTable accepted <\n")
     f = open(".tables","a")
-    data = user + "-" + timeTable + "&" + "\n"
+    data = owner + "-" + timeTable + "&\n"
     f.write(data)
     f.close()
-
-
-def DrawLine(size,count):
-    print("+",end="")
-    for i in range(count):
-        for j in range(size):
-            print("-",end = "")
-        print("+", end = "")
-    print()
-
-def LookTimeTable(timeTable):
-    print(timeTable.user)
-    for i in range(7):
-        DrawLine(8,6)
-        print("| itt lesz az adat a timeTable.data-ból")
-
-def GenerateTT_Class(dataInString):
+def generateTT_Class(line):
     user = ""
-    data = ""
+    lessons = ""
     i = 0
-    while(dataInString[i] != "-"):
-        user += dataInString[i]
+    while(line[i] != "-"):
+        user += line[i]
         i += 1
     i += 1
-    while(dataInString[i] != "&"):
-        data += dataInString[i]
-    result = TimeTable(user,data)
-    return result
+    while(line[i] != "&"):
+        lessons += line[i]
+        i += 1
+    return TimeTable(user,lessons)
 
-def DrawBlock(number):
+def watchTimeTable():
+    f = open(".tables","r")
+    menuItems = []
+    userList = []
+
+    for line in f:
+        #ignoring comments
+        if(line[0] != "#"):
+            actualTimeTable = generateTT_Class(line)
+            menuItems.append(actualTimeTable.user)
+            userList.append(actualTimeTable)
+    print("     Which TimeTable you want to watch?\n")
+    result =  drawMenu(menuItems)
+    days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    print("\n Owner: "+menuItems[int(result)])
+    drawTable(days)
+    drawLessonsOut(userList[int(result)].data,days)
+
+def logOut():
+    result = input(" Are you sure you want to log out? [Y/n]: ")
+    if(result == "n" or result == "N"):
+        return True
+    elif(result == "" or result == "Y" or result == "y"):
+        return False
+
+def deleteTable():
+    f = open(".tables","r")
+    menuItems = []
+    informations = []
+    for line in f:
+        informations.append(line)
+        if(line[0] != "#"):
+            actualTimeTable = generateTT_Class(line)
+            menuItems.append(actualTimeTable.user)
+    menuItems.append("Cancel")
+    print("     Which TimeTable you want to Delete?\n")
+    result = drawMenu(menuItems)
+    deleTable = menuItems[int(result)]
+    f.close()
+    
+
+    if(deleTable == "Cancel"):
+        print("\n > action canceled <")
+    else:
+        f = open(".tables","w")
+        for line in informations:
+            if(deleTable in line):
+                print("\n > " + deleTable + " deleted <")
+            else:
+                f.write(line)
+        f.close()
+
+def watchDay():
+    menuItems = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    print("     Which day you wish to inspect?\n")
+    result = drawMenu(menuItems)
+    daylist = calculateDay(int(result))
+    drawColumnFromList(daylist,menuItems[int(result)])
+    quit = input(" Do you wish to inspect a specific time? [Y/n]: ")
+    if(quit == "y" or quit == "Y" or quit == ""):
+        calculateOneLesson(int(result))
+
+
+def watchWeek():
+    #calculateWeek()
+    drawWeek()
+    watchD = input("\n Do you wish to watch a specific day? [Y/n]: ")
+
+    menuItems = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    print("\n     Which day you wish to inspect?\n")
+    result = drawMenu(menuItems)
+    
+    if(watchD == "y" or watchD == "Y" or watchD == ""):
+        calculateOneLesson(int(result))
+    
+# Drawings
+def drawBlock(number):
     print("+",end="")
     for i in range(number+2):
         print("-",end="")
-    #print("+",end="")
 
-def DrawLineFromList(list):
+def drawLineFromList(list):
     for i in list:
-        DrawBlock(len(i))
-    print("+",end="")
-    print()
+        drawBlock(len(i))
+    print("+")
 
-def DrawDatasFromList(list):
+def drawDatasFromList(list):
     for i in list:
         print("| ",end="")
-        print(i,"",end="")
-    print("|",end="")
-    print()
+        print(str(i)+"",end=" ")
+    print("|")
 
-def DrawLessonsOut(Lessons,list):
+def drawLessonsOut(Lessons,list):
     for i in range(6):
-        #+8
-        #print("| ",end="")
-        #print(Lessons[i],end="")
-        #for spaces in range(len(list[0])):
-        #    print(" ",end="")
         print("| ",end="")
         for j in range(i,41,7):
             print(Lessons[j],end="")
-            for spaces in range(0,len(list[j % 6-i])):
+            for spaces in range(0,len(list[j % 6-i])): 
                    print(" ",end="")
-                
-
             print("| ",end="")
         print()
-        DrawLineFromList(list)
+        drawLineFromList(list)
     
-def DrawTable(list):
-    DrawLineFromList(list)
-    DrawDatasFromList(list)
-    DrawLineFromList(list)
+def drawTable(list):
+    os.system('setterm -foreground blue -bold on')
+    drawLineFromList(list)
+    drawDatasFromList(list)
+    drawLineFromList(list)
+    os.system('setterm -foreground white -bold off')
+
+def drawSingleItem(item):
+    drawBlock(len(item))
+    os.system('setterm -foreground blue -bold on')
+    print("+\n| "+item+" |")
+    drawBlock(len(item))
+    print("+")
+    os.system('setterm -foreground white -bold off')
+
+def drawColumn(data,header):
+    #data = "000000"
+    drawSingleItem(header)
+    
+    for inf in data:
+        print("| "+inf,end="")
+        for spaces in range(len(header)):
+            print(" ",end="")
+        print("|")
+        drawBlock(len(header))
+        print("+")
+
+def drawColumnFromList(datas,header):
+    drawSingleItem(header)
+    for inf in datas:
+        print("| "+str(inf)+" %",end="")
+        for spaces in range(len(header)-len(str(inf))-1):
+            print(" ",end="")
+        print("|")
+        drawBlock(len(header))
+        print("+")
+
+def drawWeek():
+    days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    drawTable(days)
+    #DrawPercents
+    weekData = calculateWeek() # in Percents
+
+    #for spaces in range(0,len(list[j % 6-i])): 
+        #print(" ",end="")
+
+    for i in range(6):
+        for j in range(6):
+            print("| "+str(weekData[j][i]),end=" % ")
+            for spaces in range(len(str(days[j % 6]) ) - len(str(weekData[j][i]))-2):
+                print(" ",end="")
+        print("|")
+        drawLineFromList(days)
+    
+
+# drawMenu
+def drawMenu(menuElements):
+    index = 0
+    for menuItem in menuElements:
+        print("     [{0}] {1}".format(index,menuItem))
+        index += 1
+    print()
+    return input(" >> ")
+
+#Calculations
+def calculateDay(dayIndex):
+    result = [0,0,0,0,0,0] # count
+    tablesList = []
+    f = open(".tables","r")
+    for line in f:
+        if(line[0] != "#"):
+            tablesList.append(generateTT_Class(line))
+    f.close()
+    for table in tablesList:
+        index = 0
+        for i in range(dayIndex*7,dayIndex*7+6):
+            if(table.data[i] == "0"):
+                result[index] +=1
+            index +=1
+
+    for i in range(len(result)):
+        result[i] = int((result[i]/len(tablesList))*100) #percent   
+    return result
+
+def calculateOneLesson(dayIndex):
+    print("\n     Which time?\n")
+    menuItems = ["8:00 - 9:40","10:00 - 11:40","11:50 - 13:30","13:40 - 15:20","15:30 - 17:10","17:20 - 19:00"]
+    result = drawMenu(menuItems)
+    tablesList = []
+    availableMembers = []
+    nonAvailableMembers = []
+    f = open(".tables","r")
+    for line in f:
+        if(line[0] != "#"):
+            tablesList.append(generateTT_Class(line))
+    f.close()
+    #generating class list def?
+    for table in tablesList:
+        index = 0
+        if(table.data[dayIndex*7+int(result)] == "0"):
+            availableMembers.append(table.user)
+        else:
+            nonAvailableMembers.append(table.user + " - [" + table.data[dayIndex*7+int(result)]+"]")
+    print("\n The list of the available members of the group at "+menuItems[int(result)]+": \n")
+
+    os.system('setterm -foreground green')
+    for member in availableMembers:
+        print(" -- "+member)
+    os.system('setterm -foreground white')
+    print("\n The list of the non available members of the group at "+menuItems[int(result)]+":\n")
+    #print(" -- Name - [R]eason\n")
+    os.system('setterm -foreground red')
+    for member in nonAvailableMembers:
+        print(" -- "+member)
+    os.system('setterm -foreground white')
+    print()
+
+def calculateWeek():
+    weekDays = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]]
+    tablesList = []
+    f = open(".tables","r")
+    for line in f:
+        if(line[0] != "#"):
+            tablesList.append(generateTT_Class(line))
+    f.close()
+    dayIndex = 0
+    index = 0
+    result = [0,0,0,0,0,0]
+    for table in tablesList:
+        for times in range(6):
+            index = 0
+            for i in range(dayIndex*7,dayIndex*7+6):
+                if(table.data[i] == "0"):
+                    result[index] +=1
+                index +=1
+            for i in range(6):
+                weekDays[dayIndex][i] += result[i]
+            dayIndex +=1
+            result = [0,0,0,0,0,0]
+        dayIndex = 0
+    #print(weekDays)
+
+    for i in range(6):
+        for j in range(6):
+            weekDays[i][j] = int((weekDays[i][j]/len(tablesList))*100)
+    #print(weekDays)
+    return weekDays 
         
 
+# Main block
+loggedIn = False
+menuState = 0
+subMenuState = 0
+answer = "0"
+mainMenu = ["Login","Help","Settings"]
+mainMenuExec = ["loggedIn = login()","help()","settings()"] # Settings are not done
 
-#_____MAIN_____
-menuElements = ["Bejelentkezés","Segítség","Kilépés"]
-adatok = ["Hétfő","Kedd","Szerda","Csütörtök","Péntek","Szombat"]
-DrawTable(adatok)
-DrawLessonsOut("W00000-W00000-E00000-G00000-000000-E00GGE",adatok)
-print("CTable -- Szervezés és időbeosztás")
-menuResult = menu(menuElements)
-if(menuResult == "1"):
-    #Bejelentkezés
-    if(login() == True):
-        os.system("clear")
-        print("CTable Admin felület")
-        admenu = adminmenu()
-        if(admenu == "1"):
-            print("tábla hozzáadása")
-            #Tábla hozzáadása működget - jólenne üres tábla funkció beépítése
-            AddTimeTable()
-        if(admenu == "2"):
-            print("Tábla megtekintése")
-            f = open(".tables","r")
-            for line in f:
-                #Nyers stringből kiolvasás
-                if(line[0] != "#"):
-                    # Nem komment
-                    print(GenerateTT_Class(line).user)
-            f.close()
-            #DrawLine(8,6)
-        if(admenu == "3"):
-            print("Tábla módosítása")
-        if(admenu == "4"):
-            print("Tábla törlése")
-elif(menuResult == "2"):
-    #Segítség
-    print("--help")
-else:
-    print("A program most kilép.")
+adminMenu = ["Add Table","Watch Table","Delete Table","Watch Day","Watch Week","Log out"]
+adminMenuExec = ["addTimeTable()","watchTimeTable()","deleteTable()","watchDay()","watchWeek()","loggedIn = logOut()"] 
 
+menues = []
+menues.append(mainMenu)
+menues.append(adminMenu)
 
+execMenu = []
+execMenu.append(mainMenuExec)
+execMenu.append(adminMenuExec)
 
+while(answer != "q" and answer != "Q"):
+    os.system("clear")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    #DEBUG SESSION
+    #Tlist = calculateDay(1)
+    #drawColumnFromList(Tlist,"Példa Nap")
+    #END DEBUG SESSION
     
+    width = os.get_terminal_size().columns
+    log = ""
+    if(loggedIn == True):
+        log = "Logged in as root"
+        menuState = 1
+    else:
+        log = "Logged out       "
+        menuState = 0
+    os.system('setterm -foreground blue')
+    print(log,end="")
+    print("CTable\n".center(width-len(log)-6))
+    os.system('setterm -foreground white')
+
+    answer = drawMenu(menues[menuState])
+    if(answer != "q" and answer != "Q"):
+        subMenuState = int(answer)
+        print(" >> "+menues[menuState][subMenuState]+" <<\n")
+        exec(execMenu[menuState][subMenuState])
+
+        input(" >> done << ")
+    else:
+        quit = input(" Are you sure, you want to quit? [Y/n]: ")
+        if(quit == "n" or quit == "N"):
+            answer = "0"
+        elif(quit == ""):
+            answer = "q"
+            os.system("clear")
