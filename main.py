@@ -1,6 +1,7 @@
 # >> Kovács Norbert          <<
 # >> 2020                    <<
-# >> Op. rend. gyakorlat     << 
+# >> Op. rend. gyakorlat     <<
+# >> CTable alkalmazás       <<
 
 import os
 import encrypt as en
@@ -62,10 +63,12 @@ class SyntaxChecker():
             return True
         else:
             return False
-    #Lesson char check?
+    #Lesson char check? [L-W-P-0]
 
     
-# functions for files
+# Functions
+
+# User
 def readUserData(data):
     index = 0
     userInformation = []
@@ -77,7 +80,7 @@ def readUserData(data):
         index+=1
     return User(userInformation[0],userInformation[1],userInformation[2])
 
-# functions for MenuBlocks
+# Functions for Executable Menu
 def login():
     os.system('setterm -foreground yellow')
     userName = input(" Username: ")
@@ -96,9 +99,17 @@ def login():
         return True
     else:
         print(" > Username or Password is not correct <\n")
+        logAttempt(userName,userPassword)
         return False
-    #Saving every unsuccesfull login attempt?
-
+    
+# saving unsuccesfull login attempts
+def logAttempt(userName,userPassword):
+    f = open(".log","a")
+    f.write(" > login attempt <\n")
+    f.write("username: "+userName+"; password: "+userPassword+"\n") # Time
+    f.close()
+    
+# displaying help file
 def help():
     os.system("clear")
     width = os.get_terminal_size().columns
@@ -107,10 +118,27 @@ def help():
     print("CTable help screen\n".center(width))
     os.system('setterm -foreground white')
     os.system("cat help")
-    #on small screen?
+    #os.system("less help")
+    #not readable on small screen
 
 def settings():
     print("     >> Settings are not available yet<<\n")
+    #language change (eng, hun), stay logged in, delete/exit/logout without confirmation
+    #set encryption key, simple-mode [yes-no] -> not draws tables 
+
+# Search for existing owner
+def fileContaining(name):
+    f = open(".tables","r")
+    users = []
+    for line in f:
+        if(line[0] != "#"):
+            actualTimeTable = generateTT_Class(line)
+            users.append(actualTimeTable.user)
+    f.close()
+    for user in users:
+        if(name == user):
+            return True
+    return False
 
 def addTimeTable():
     os.system("clear")
@@ -122,10 +150,12 @@ def addTimeTable():
     
     synCh = SyntaxChecker()
     owner = ""
-    while(synCh.nameCheck(owner) == False):    
+    while(synCh.nameCheck(owner) == False or fileContaining(owner) == True):    
         owner = input(" The owner of the table: ")
         if(synCh.nameCheck(owner) == False):
-            print(" > Name has to be longer tha 3 characters, and can not containt '-' symbol <\n")
+            print(" > Name has to be longer tha 3 characters, and can not contain '-' symbol <\n")
+        elif(fileContaining(owner) == True):
+            print(" > Owner allready exist in database <\n")
         else:
             print(" > Name accepted <\n")
     timeTable = ""
@@ -140,6 +170,8 @@ def addTimeTable():
     data = owner + "-" + timeTable + "&\n"
     f.write(data)
     f.close()
+    
+# generating class from a string
 def generateTT_Class(line):
     user = ""
     lessons = ""
@@ -165,11 +197,16 @@ def watchTimeTable():
             menuItems.append(actualTimeTable.user)
             userList.append(actualTimeTable)
     print("     Which TimeTable you want to watch?\n")
+    menuItems.append("Cancel")
     result =  drawMenu(menuItems)
-    days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-    print("\n Owner: "+menuItems[int(result)])
-    drawTable(days)
-    drawLessonsOut(userList[int(result)].data,days)
+
+    if(result == str(len(menuItems)-1)):
+        print(" > action cancelled <")
+    else:
+        days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+        print("\n Owner: "+menuItems[int(result)])
+        drawTable(days)
+        drawLessonsOut(userList[int(result)].data,days)
 
 def logOut():
     result = input(" Are you sure you want to log out? [Y/n]: ")
@@ -195,7 +232,7 @@ def deleteTable():
     
 
     if(deleTable == "Cancel"):
-        print("\n > action canceled <")
+        print("\n > action cancelled <")
     else:
         f = open(".tables","w")
         for line in informations:
@@ -217,7 +254,6 @@ def watchDay():
 
 
 def watchWeek():
-    #calculateWeek()
     drawWeek()
     watchD = input("\n Do you wish to watch a specific day? [Y/n]: ")
 
@@ -228,7 +264,7 @@ def watchWeek():
     if(watchD == "y" or watchD == "Y" or watchD == ""):
         calculateOneLesson(int(result))
     
-# Drawings
+# Drawing session
 def drawBlock(number):
     print("+",end="")
     for i in range(number+2):
@@ -272,7 +308,6 @@ def drawSingleItem(item):
     os.system('setterm -foreground white -bold off')
 
 def drawColumn(data,header):
-    #data = "000000"
     drawSingleItem(header)
     
     for inf in data:
@@ -296,11 +331,7 @@ def drawColumnFromList(datas,header):
 def drawWeek():
     days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
     drawTable(days)
-    #DrawPercents
-    weekData = calculateWeek() # in Percents
-
-    #for spaces in range(0,len(list[j % 6-i])): 
-        #print(" ",end="")
+    weekData = calculateWeek()
 
     for i in range(6):
         for j in range(6):
@@ -309,9 +340,8 @@ def drawWeek():
                 print(" ",end="")
         print("|")
         drawLineFromList(days)
-    
 
-# drawMenu
+# Menu
 def drawMenu(menuElements):
     index = 0
     for menuItem in menuElements:
@@ -320,7 +350,7 @@ def drawMenu(menuElements):
     print()
     return input(" >> ")
 
-#Calculations
+# Calculations
 def calculateDay(dayIndex):
     result = [0,0,0,0,0,0] # count
     tablesList = []
@@ -352,7 +382,7 @@ def calculateOneLesson(dayIndex):
         if(line[0] != "#"):
             tablesList.append(generateTT_Class(line))
     f.close()
-    #generating class list def?
+    
     for table in tablesList:
         index = 0
         if(table.data[dayIndex*7+int(result)] == "0"):
@@ -396,12 +426,10 @@ def calculateWeek():
             dayIndex +=1
             result = [0,0,0,0,0,0]
         dayIndex = 0
-    #print(weekDays)
 
     for i in range(6):
         for j in range(6):
-            weekDays[i][j] = int((weekDays[i][j]/len(tablesList))*100)
-    #print(weekDays)
+            weekDays[i][j] = int((weekDays[i][j]/len(tablesList))*100) # to percent
     return weekDays 
         
 
@@ -411,7 +439,7 @@ menuState = 0
 subMenuState = 0
 answer = "0"
 mainMenu = ["Login","Help","Settings"]
-mainMenuExec = ["loggedIn = login()","help()","settings()"] # Settings are not done
+mainMenuExec = ["loggedIn = login()","help()","settings()"]
 
 adminMenu = ["Add Table","Watch Table","Delete Table","Watch Day","Watch Week","Log out"]
 adminMenuExec = ["addTimeTable()","watchTimeTable()","deleteTable()","watchDay()","watchWeek()","loggedIn = logOut()"] 
@@ -426,11 +454,6 @@ execMenu.append(adminMenuExec)
 
 while(answer != "q" and answer != "Q"):
     os.system("clear")
-
-    #DEBUG SESSION
-    #Tlist = calculateDay(1)
-    #drawColumnFromList(Tlist,"Példa Nap")
-    #END DEBUG SESSION
     
     width = os.get_terminal_size().columns
     log = ""

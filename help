@@ -29,7 +29,14 @@ DESCRIPTION
 			>> There is no Sunday implemented, or lessons after 19:00
 
 		You need a registered account to use and acces the informations.
-		Accounts are NOT stored online.
+		Account is NOT stored online.
+
+		Tested in:
+			Ubuntu 19.10 x86_64
+			Kernel: 5.3.0-42-generic
+			Shell: bash 5.0.3
+
+			Python version: 3.7.5 
 
 MENU
 		[X] Exit
@@ -61,6 +68,9 @@ MENU
 
 			Formatting help: 
 				Owner: Owner Name
+
+				-- CAUTION: You can only add an owner once --
+				
 				Lesson[6x6]: 000000-000000-000000-000000-000000-000000
 
 				-- WARNING: The program will only accept properly formatted input --
@@ -77,7 +87,8 @@ MENU
 
 			If you dont see any " > 'Owner Name' deleted < " message, something went wrong!
 
-			If you see multiple " > 'Owner Name' deleted < " message, there were duplicates.
+			If you see multiple " > 'Owner Name' deleted < " message, there were duplicates,
+			- please be sure not to edit the file contaning the timetables! -
 
 		[3] Watch Day
 			You have to select a specific day, then the program will show how many of the members
