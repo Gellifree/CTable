@@ -90,7 +90,7 @@ def login():
 
     for user in users:
         data = user
-        # Only one user exist at the time - maybe later we want to expand
+        # Only one user exist at the time
     data = en.logData(data,20)
     users.close()
     user = readUserData(data)
@@ -167,12 +167,16 @@ def addTimeTable():
         else:
             print(" > TimeTable accepted <\n")
     f = open(".tables","a")
-    data = owner + "-" + timeTable + "&\n"
-    f.write(data)
+    data = owner + "-" + timeTable + "&"
+    #Encrypting
+    data = en.tableEnc(data,2)
+    f.write(data+"\n")
     f.close()
     
 # generating class from a string
 def generateTT_Class(line):
+    #Decriptíng line
+    line = en.tableBack(line,2)
     user = ""
     lessons = ""
     i = 0
@@ -234,10 +238,11 @@ def deleteTable():
     if(deleTable == "Cancel"):
         print("\n > action cancelled <")
     else:
+        deleTable = en.tableEnc(deleTable,2)
         f = open(".tables","w")
         for line in informations:
             if(deleTable in line):
-                print("\n > " + deleTable + " deleted <")
+                print("\n > " + en.tableBack(deleTable,2) + " deleted <")
             else:
                 f.write(line)
         f.close()
@@ -257,12 +262,13 @@ def watchWeek():
     drawWeek()
     watchD = input("\n Do you wish to watch a specific day? [Y/n]: ")
 
-    menuItems = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-    print("\n     Which day you wish to inspect?\n")
-    result = drawMenu(menuItems)
-    
     if(watchD == "y" or watchD == "Y" or watchD == ""):
+        menuItems = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+        print("\n     Which day you wish to inspect?\n")
+        result = drawMenu(menuItems)
         calculateOneLesson(int(result))
+    
+    
     
 # Drawing session
 def drawBlock(number):
